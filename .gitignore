@@ -1,3 +1,4 @@
 *.tfvars
 gcs.json
 *.parquet
+*duckdb
