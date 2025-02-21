@@ -9,4 +9,4 @@
 - [Workshop](./Workshop/)
     - [Homework](./Workshop/homework.md)
 - [Module 4](./Module_4/)
-    - [Homework](./Module_4/homework.md)
+    - [Homework 4](./Module_4/homework.md)
