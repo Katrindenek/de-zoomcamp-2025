@@ -10,3 +10,5 @@
     - [Homework](./Workshop/homework.md)
 - [Module 4](./Module_4/)
     - [Homework 4](./Module_4/homework.md)
+- [Module 5](./Module_5/)
+    - [Homework 5](./Module_5/homework.md)
