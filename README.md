@@ -12,3 +12,5 @@
     - [Homework 4](./Module_4/homework.md)
 - [Module 5](./Module_5/)
     - [Homework 5](./Module_5/homework.md)
+- [Module 6](./Module_6/)
+    - [Homework 6](./Module_6/homework.md)
