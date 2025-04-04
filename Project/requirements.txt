@@ -1,0 +1,6 @@
+newsapi-python 
+dlt
+"dlt[bigquery]"
+pyspark 
+dbt-core 
+dbt-bigquery
