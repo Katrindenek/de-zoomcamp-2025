@@ -3,3 +3,8 @@ gcs.json
 *.parquet
 *duckdb
 .vscode
+*.json
+.dev
+env
+.terraform*
+*.tfstate*
