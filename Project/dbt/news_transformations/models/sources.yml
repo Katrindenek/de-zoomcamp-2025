@@ -1,0 +1,65 @@
+# dbt/news_transformations/models/sources.yml
+
+version: 2
+
+sources:
+  - name: news_data
+    database: "{{ env_var('DBT_DATABASE') }}"
+    schema: "{{ env_var('DBT_DATASET') }}"
+    tables:
+      - name: extract_news_ar
+        description: "Extracted news data in Arabic"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_de
+        description: "Extracted news data in German"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_en
+        description: "Extracted news data in English"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_es
+        description: "Extracted news data in Spanish"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_fr
+        description: "Extracted news data in French"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_he
+        description: "Extracted news data in Hebrew"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_it
+        description: "Extracted news data in Italian"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_nl
+        description: "Extracted news data in Dutch"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_no
+        description: "Extracted news data in Norwegian"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_pt
+        description: "Extracted news data in Portuguese"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_ru
+        description: "Extracted news data in Russian"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_sv
+        description: "Extracted news data in Swedish"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_ud
+        description: "Extracted news data in Urdu"
+        meta:
+          warn_if_missing: true
+      - name: extract_news_zh
+        description: "Extracted news data in Chinese"
+        meta:
+          warn_if_missing: true
