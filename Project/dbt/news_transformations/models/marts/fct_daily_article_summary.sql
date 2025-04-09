@@ -1,7 +1,7 @@
 select
-  date(publishedAt) as article_date,
+  date(published_at) as article_date,
   language,
-  source_name,
+  source__name,
   count(*) as article_count
 from {{ ref('stg_news_articles') }}
 group by 1, 2, 3
