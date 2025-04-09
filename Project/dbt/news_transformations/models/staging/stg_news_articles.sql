@@ -2,8 +2,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_ar') }}
 
@@ -13,8 +13,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_de') }}
 
@@ -24,8 +24,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_en') }}
 
@@ -35,8 +35,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_es') }}
 
@@ -46,8 +46,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_fr') }}
 
@@ -57,8 +57,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_he') }}
 
@@ -68,8 +68,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_it') }}
 
@@ -79,8 +79,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_nl') }}
 
@@ -90,8 +90,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_no') }}
 
@@ -101,8 +101,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_pt') }}
 
@@ -112,8 +112,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_ru') }}
 
@@ -123,8 +123,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_sv') }}
 
@@ -134,8 +134,8 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_ud') }}
 
@@ -145,7 +145,7 @@ select
   article_id,
   title,
   description,
-  publishedAt,
-  source.name as source_name,
+  published_at,
+  source__name,
   language
 from {{ source('news_data', 'extract_news_zh') }}
