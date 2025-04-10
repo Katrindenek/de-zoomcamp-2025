@@ -1,0 +1,56 @@
+id: news_transform_dbt
+namespace: zoomcamp
+
+labels:
+  owner: ekaterina.tsapko
+  project: news-analysis
+  environment: dev
+
+tasks:
+  - id: dbt
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      - id: cloneRepository
+        type: io.kestra.plugin.git.Clone
+        url: https://github.com/Katrindenek/de-zoomcamp-2025
+        branch: main
+        # namespace: "{{flow.namespace}}"
+        # dryRun: false
+
+      - id: dbt-build
+        type: io.kestra.plugin.dbt.cli.DbtCLI
+        containerImage: ghcr.io/dbt-labs/dbt-bigquery:latest
+        env:
+          DBT_DATABASE: "{{ kv('GCP_Credentials') | jq('.project_id') | first }}"
+          DBT_SCHEMA: "{{kv('GCP_Dataset')}}"
+          DBT_DATASET: "{{kv('GCP_Dataset')}}"
+        taskRunner:
+          type: io.kestra.plugin.scripts.runner.docker.Docker
+        commands:
+          - dbt seed --project-dir Project/dbt/news_transformations
+          - dbt build --project-dir Project/dbt/news_transformations
+        namespaceFiles:
+          enabled: true
+        inputFiles:
+          sa.json: "{{kv('GCP_Credentials')}}"
+        storeManifest:
+          key: manifest.json
+          namespace: "{{ flow.namespace }}"
+        projectDir: Project/dbt/news_transformations
+        profiles: |
+          news_transformations:
+            target: dev
+            outputs:
+              dev:
+                type: bigquery
+                method: service-account-json
+                project: "{{ kv('GCP_Credentials') | jq('.project_id') | first }}"
+                dataset: "{{kv('GCP_Dataset')}}"
+                location: "{{kv('GCP_Location')}}"
+                keyfile: sa.json
+                method: service-account
+                priority: interactive
+                threads: 16
+                timeout_seconds: 300
+                fixed_retries: 1
+
