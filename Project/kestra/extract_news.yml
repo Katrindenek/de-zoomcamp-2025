@@ -1,0 +1,249 @@
+id: extract_news
+namespace: zoomcamp
+description: |
+  This flow extracts news from News API (https://newsapi.org/) and loads to BigQuery.
+  You have to save your Credentials JSON for BigQuery and API Key for News API to Key-Value Vault.
+
+labels:
+  owner: ekaterina.tsapko
+  project: news-analysis
+  environment: dev
+
+inputs:
+  - id: language
+    type: SELECT
+    displayName: "News language"
+    defaults: en
+    values:
+      - ar
+      - de
+      - en
+      - es
+      - fr
+      - he
+      - it
+      - nl
+      - no
+      - pt
+      - ru
+      - sv
+      - ud
+      - zh
+    description: | 
+      The 2-letter ISO-639-1 code of the language you want to get headlines for.
+
+
+tasks:
+  - id: set_label
+    type: io.kestra.plugin.core.execution.Labels
+    labels:
+      date: "{{ trigger.date }}"
+      language: "{{ inputs.language }}"
+
+  - id: bq_create_table
+    type: io.kestra.plugin.gcp.bigquery.Query
+    serviceAccount: "{{ kv('GCP_Credentials') }}"
+    projectId: "{{ kv('GCP_Credentials') | jq('.project_id') | first }}"
+    sql: |
+      CREATE TABLE IF NOT EXISTS news_data.extract_news_{{ inputs.language }} (
+        _dlt_valid_from TIMESTAMP,
+        _dlt_valid_to TIMESTAMP,
+        source__name STRING,
+        author STRING,
+        title STRING,
+        url STRING,
+        published_at TIMESTAMP,
+        content STRING,
+        language STRING,
+        article_id STRING	NOT NULL,
+        _dlt_load_id STRING	NOT NULL,
+        _dlt_id STRING NOT NULL,
+        description STRING,
+        url_to_image STRING,
+        source__id STRING
+      )
+
+  - id: extract_and_load
+    type: io.kestra.plugin.scripts.python.Script
+    docker:
+      image: python:3.11
+    beforeCommands:
+      - apt-get update && apt-get install -y apt-utils && apt-get install -y build-essential
+      - pip install dlt dlt[bigquery] google-cloud-bigquery-storage psutil
+    script: |
+      import dlt
+      from datetime import datetime, timedelta
+      import hashlib
+
+      from dlt.destinations import bigquery
+      from dlt.sources.helpers.rest_client import RESTClient
+      from dlt.sources.helpers.rest_client.paginators import PageNumberPaginator
+      from dlt.sources.helpers.rest_client.auth import APIKeyAuth
+
+      def generate_article_id(article):
+        # Combine fields that uniquely identify an article
+
+        unique_str = (str(article.get('url', 'Unknown')) + str(article.get('publishedAt', '')) +
+                      str(article.get('author', 'Unknown')) + str(article.get('title', 'Unknown')) +
+                      str(article.get('language')))
+        
+        # Generate hash
+        return hashlib.sha256(unique_str.encode('utf-8')).hexdigest()
+
+      # Function to dynamically generate resources per language
+      def create_news_resource(language):
+        @dlt.resource(name=f"extract_news_{language}", 
+                      write_disposition={"disposition": "merge", "strategy": "scd2"},
+                      primary_key="article_id")
+        def news(
+            cursor_date=dlt.sources.incremental(
+                "publishedAt"   # <--- field to track, our timestamp
+                )
+        ):
+            client = RESTClient(
+                base_url="https://newsapi.org/v2/",
+                auth=APIKeyAuth(name="apiKey", api_key="{{kv('News_API')}}", location="query"),
+                paginator=PageNumberPaginator(
+                    base_page=1,
+                    maximum_page=5,  # News API limitation
+                    total_path=None
+                )
+            )
+
+            for page in client.paginate(
+                "everything",
+                params={"q": "data engineering",
+                        "from": "{{ trigger.date | default(execution.startDate) | date('yyyy-MM-dd') }}",
+                        "to": "{{ trigger.date | default(execution.startDate) | date('yyyy-MM-dd') }}",
+                        "language": language,
+                },
+            ):
+                for article in page:
+                    article["language"] = language
+                    article["article_id"] = generate_article_id(article)
+                    yield article
+        return news
+
+      credentials = {
+        "project_id": '{{kv('GCP_project_id')}}',
+        "private_key_id": '{{kv('GCP_private_key_id')}}',
+        "private_key": '{{kv('GCP_private_key')}}',
+        "client_email": '{{kv('GCP_client_email')}}'
+      }
+
+      # Define dlt pipeline
+      pipeline = dlt.pipeline("news_pipeline", 
+                              destination=bigquery(
+                                  credentials=credentials,
+                                  location='EU'
+                              ),
+                              dataset_name='news_data',
+                              progress="log",)
+
+      # Incrementally load articles to BigQuery
+      resource = create_news_resource("{{ inputs.language }}")
+      info = pipeline.run(
+        resource
+      )
+
+
+triggers:
+  - id: ar_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: ar
+
+  - id: de_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "5 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: de
+
+  - id: en_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "10 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: en
+
+  - id: es_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "15 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: es
+
+  - id: fr_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "20 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: fr
+
+  - id: he_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "25 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: he
+
+  - id: it_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "30 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: it
+
+  - id: nl_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "35 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: nl
+
+  - id: no_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "40 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: no
+
+  - id: pt_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "45 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: pt
+
+  - id: ru_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "50 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: ru
+
+  - id: sv_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "55 6 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: sv
+
+  - id: ud_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 7 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: ud
+
+  - id: zh_schedule_trigger
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "5 7 * * *"
+    # timezone: Europe/Berlin
+    inputs:
+      language: zh
+
+      
