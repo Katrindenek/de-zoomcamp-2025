@@ -14,3 +14,5 @@
     - [Homework 5](./Module_5/homework.md)
 - [Module 6](./Module_6/)
     - [Homework 6](./Module_6/homework.md)
+- [Project](./Project/)
+    - [Data Engineering News](./Project/README.md)
